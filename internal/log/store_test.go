@@ -43,19 +43,18 @@ func testAppend(t *testing.T, s *store) {
 func testRead(t *testing.T, s *store) {
 	t.Helper()
 
-	var p uint64 = 0
+	var pos uint64 = 0
 	for i := uint64(1); i < 4; i++ {
-		read, err := s.Read(p)
+		read, err := s.Read(pos)
 		require.NoError(t, err)
 		require.Equal(t, write, read)
-		p += width
+		pos += width
 	}
 }
 
 func testReadAt(t *testing.T, s *store) {
 	t.Helper()
 
-	var pos uint64
 	for i, off := uint64(1), int64(0); i < 4; i++ {
 		b := make([]byte, lenWidth)
 		n, err := s.ReadAt(b, off)
