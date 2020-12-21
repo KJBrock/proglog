@@ -1,9 +1,10 @@
 package log
 
 import (
-	"github.com/tysontate/gommap"
 	"io"
 	"os"
+
+	"github.com/tysontate/gommap"
 )
 
 var (
@@ -35,9 +36,9 @@ func newIndex(f *os.File, c Config) (*index, error) {
 
 	if idx.mmap, err = gommap.Map(
 		idx.file.Fd(),
-		gommap.PROT_READ | commap.PROT_WRITE,
+		gommap.PROT_READ|gommap.PROT_WRITE,
 		gommap.MAP_SHARED,
-	) err != nil {
+	); err != nil {
 		return nil, err
 	}
 
@@ -49,11 +50,11 @@ func (i *index) Close() error {
 		return err
 	}
 
-	if err = i.file.Sync(); err != nil {
+	if err := i.file.Sync(); err != nil {
 		return err
 	}
 
-	if err = i.file.Truncate(int64(i.size)); err != nil {
+	if err := i.file.Truncate(int64(i.size)); err != nil {
 		return err
 	}
 
@@ -66,28 +67,28 @@ func (i *index) Read(in int64) (out uint32, pos uint64, err error) {
 	}
 
 	if in == -1 {
-		out = uint32((i.size/entWidth) - 1)
+		out = uint32((i.size / entWidth) - 1)
 	} else {
 		out = uint32(in)
 	}
 
 	pos = uint64(out) * entWidth
-	if i.size < pos + entWidth {
+	if i.size < pos+entWidth {
 		return 0, 0, io.EOF
 	}
 
-	out = enc.Uint32(i.mmap[pos : pos + offWidth])
-	pos = enc.Uint64(i.mmap[pos + offWidth : pos + entWidth])
+	out = enc.Uint32(i.mmap[pos : pos+offWidth])
+	pos = enc.Uint64(i.mmap[pos+offWidth : pos+entWidth])
 	return out, pos, nil
 }
 
 func (i *index) Write(off uint32, pos uint64) error {
-	if uint64(len(i.mmap)) < i.size + entWidth {
+	if uint64(len(i.mmap)) < i.size+entWidth {
 		return io.EOF
 	}
 
-	enc.PutUint32(i.mmap[i.size : i.size + offWidth], off)
-	enc.PutUint64(i.mmap[i.size + offWidth : i.size + entWidth], pos)
+	enc.PutUint32(i.mmap[i.size:i.size+offWidth], off)
+	enc.PutUint64(i.mmap[i.size+offWidth:i.size+entWidth], pos)
 	i.size += uint64(entWidth)
 
 	return nil
@@ -96,4 +97,3 @@ func (i *index) Write(off uint32, pos uint64) error {
 func (i *index) Name() string {
 	return i.file.Name()
 }
-
