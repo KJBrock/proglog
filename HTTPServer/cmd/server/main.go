@@ -2,7 +2,8 @@ package main
 
 import (
 	"log"
-	"github.com/kjbrock/proglog/HTTTPServer/internal/server"
+
+	"github.com/kjbrock/proglog/HTTPServer/internal/server"
 )
 
 func main() {
