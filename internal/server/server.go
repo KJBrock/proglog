@@ -4,12 +4,23 @@ import (
 	"context"
 
 	api "github.com/kjbrock/proglog/api/v1"
+	"google.golang.org/grpc"
 )
 
 var _ api.LogServer = (*grpcServer)(nil)
 
 type Config struct {
-	CommitLog Log
+	CommitLog CommitLog
+}
+
+func NewGRPCServer(config *Config) (*grpc.Server, error) {
+	gsrv := grpc.NewServer()
+	srv, err := newgrpcServer(config)
+	if err != nil {
+		return nil, err
+	}
+	api.RegisterLogServer(gsrv, srv)
+	return gsrv, nil
 }
 
 type grpcServer struct {
@@ -79,4 +90,9 @@ func (s *grpcServer) ConsumeStream(req *api.ConsumeRequest, stream api.Log_Consu
 			req.Offset++
 		}
 	}
+}
+
+type CommitLog interface {
+	Append(*api.Record) (uint64, error)
+	Read(uint64) (*api.Record, error)
 }
